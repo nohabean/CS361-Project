@@ -655,14 +655,12 @@ def convert_units():
         if not validate_input(input_value_str):
             continue
 
-        # Parse the input value into whole number and fraction parts
-        parts = input_value_str.split(" ")
-        if len(parts) == 2:
-            whole_part, fraction_part = parts
-            input_value = float(whole_part) + float(fractions.Fraction(fraction_part))
-        else:
-            whole_part = parts[0]
-            input_value = float(whole_part)
+        # Convert input value to float or fraction
+        try:
+            input_value = fractions.Fraction(input_value_str)
+        except ValueError:
+            show_toast("Invalid Input", "Please enter a valid number.")
+            continue
 
         if input_unit == "" or output_unit == "":
             show_toast("Invalid Input", "Must select measurement units to convert.")
@@ -676,20 +674,16 @@ def convert_units():
         conversion_factor = conversion_factors[input_unit][output_unit]
         converted_value = input_value * conversion_factor
 
-        # Format the converted value appropriately
-        whole_number = int(converted_value)
-        fraction = fractions.Fraction(converted_value - whole_number).limit_denominator()
-
-        if fraction == 0:
-            result_value = str(whole_number)
-        elif whole_number == 0:
-            result_value = str(fraction)
+        # Convert the result to a fraction if it's a whole number
+        if isinstance(converted_value, fractions.Fraction):
+            result_value = converted_value
         else:
-            result_value = f"{whole_number} {fraction}"
+            # Convert decimal to fraction
+            result_value = fractions.Fraction(converted_value).limit_denominator()
 
         # Update result box with the converted value
         result_box = layout.itemAt(4).widget()
-        result_box.setText(result_value)
+        result_box.setText(str(result_value))
 
 
 def calculate_recipes():
