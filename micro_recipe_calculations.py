@@ -13,7 +13,7 @@ def calculate_recipe(measurement_value, operation, calc_factor):
 def main():
     context = zmq.Context()
     socket = context.socket(zmq.REP)
-    socket.bind("tcp://*:5555")
+    socket.bind("tcp://*:5559")
     print("RECIPE CALCULATION MICROSERVICE HAS STARTED...")
 
     while True:

@@ -133,6 +133,7 @@ def calculate_recipes_button_layout():
     save_button_calculator.setIcon(QIcon("save_button.png"))
     save_button_calculator.setIconSize(QSize(320, 40))
     save_button_calculator.setToolTip("Export recipe calculation results")
+    save_button_calculator.clicked.connect(save_recipe_calculations)
     cs_buttons_layout_calculator.addWidget(save_button_calculator)
 
     # ------------------------------------------------------------------------------------------------------------------
@@ -680,7 +681,7 @@ def convert_units():
 def calculate_recipes():
     context = zmq.Context()
     socket = context.socket(zmq.REQ)
-    socket.connect("tcp://localhost:5555")
+    socket.connect("tcp://localhost:5559")
 
     for layout in conversion_layouts_map.values():
         # Extract item name, measurement value, and units
@@ -780,6 +781,68 @@ def save_conversions():
 
     # Send request to the save conversions microservice
     request = {"data": conversions_data, "file_path": file_path}
+    print(f"Sending request: {request}")  # Print for debugging
+    socket.send_json(request)
+
+    # Receive response from the microservice
+    response = socket.recv_json()
+    print(f"Received response: {response}")  # Print for debugging
+    if response['status'] == 'success':
+        show_toast("Save Successful", response['message'])
+    else:
+        show_toast("Save Error", response['message'])
+
+
+def save_recipe_calculations():
+    context = zmq.Context()
+    socket = context.socket(zmq.REQ)
+    socket.connect("tcp://localhost:5559")
+
+    calculations_data = []
+
+    # Collect all entries and their results
+    for layout in conversion_layouts_map.values():
+        item_name_box = layout.itemAt(1).widget()
+        item_name = item_name_box.text()
+
+        measurement_input_box = layout.itemAt(2).widget()
+        measurement_value_str = measurement_input_box.text()
+
+        measurement_unit_dropdown = layout.itemAt(3).widget()
+        measurement_unit = measurement_unit_dropdown.currentText()
+
+        operation_dropdown = layout.itemAt(4).widget()
+        operation = operation_dropdown.currentText()
+
+        calc_factor_input = layout.itemAt(5).widget()
+        calc_factor_str = calc_factor_input.text()
+
+        calc_result_box = layout.itemAt(7).widget()
+        calc_result_value = calc_result_box.text()
+
+        # Ensure all keys are present in the entry
+        entry_data = {
+            "item_name": item_name,
+            "measurement_value": measurement_value_str,
+            "measurement_unit": measurement_unit,
+            "operation": operation,
+            "calc_factor": calc_factor_str,
+            "calc_result_value": calc_result_value
+        }
+
+        calculations_data.append(entry_data)
+
+    # Open a file dialog to let the user choose the save location and file name
+    options = QFileDialog.Options()
+    file_path, _ = QFileDialog.getSaveFileName(None, "Save Recipe Calculations", "",
+                                               "Text Files (*.txt);;All Files (*)",
+                                               options=options)
+    if not file_path:
+        show_toast("Save Cancelled", "No file selected for saving.")
+        return
+
+    # Send request to the save recipe calculations microservice
+    request = {"data": calculations_data, "file_path": file_path}
     print(f"Sending request: {request}")  # Print for debugging
     socket.send_json(request)
 
