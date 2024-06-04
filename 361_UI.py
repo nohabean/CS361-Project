@@ -1,6 +1,8 @@
 import ctypes
 import fractions
 import sys
+
+import zmq
 from PySide6.QtGui import QIcon, QPixmap
 from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QTabWidget, QLabel, QHBoxLayout, QPushButton, QDialog, \
     QDialogButtonBox, QLineEdit, QComboBox, QMessageBox, QMainWindow
@@ -21,6 +23,150 @@ def dark_title_bar(window):
     value = 2
     value = ctypes.c_int(value)
     set_window_attribute(hwnd, 20, ctypes.byref(value), 4)
+
+
+def conversions_button_layout():
+    # Create button layout for the conversions tab
+    adc_buttons_layout_conversions = QHBoxLayout()
+
+    add_button_conversions = QPushButton()
+    add_button_conversions.setIcon(QIcon("add_new_button.png"))
+    add_button_conversions.setIconSize(QSize(200, 40))
+    add_button_conversions.setToolTip("<span style='color: white; font-size: 13px;'>Add a new entry to convert</span>")
+    add_button_conversions.clicked.connect(lambda checked, btn=add_button_conversions: add_new_conversion(btn))
+    adc_buttons_layout_conversions.addWidget(add_button_conversions)
+
+    delete_button_conversions = QPushButton()
+    delete_button_conversions.setIcon(QIcon("delete_all_button.png"))
+    delete_button_conversions.setIconSize(QSize(200, 40))
+    delete_button_conversions.setToolTip(
+        "<span style='color: white; font-size: 13px;'>Deletes all current entries</span>")
+    delete_button_conversions.clicked.connect(delete_all_conversions)
+    adc_buttons_layout_conversions.addWidget(delete_button_conversions)
+
+    clear_button_conversions = QPushButton()
+    clear_button_conversions.setIcon(QIcon("clear_all_button.png"))
+    clear_button_conversions.setIconSize(QSize(200, 40))
+    clear_button_conversions.setToolTip(
+        "<span style='color: white; font-size: 13px;'>Clears all data from the entry fields</span>")
+    clear_button_conversions.clicked.connect(clear_all_conversions)
+    adc_buttons_layout_conversions.addWidget(clear_button_conversions)
+
+    cs_buttons_layout_conversions = QHBoxLayout()
+
+    calculate_button_conversions = QPushButton()
+    calculate_button_conversions.setIcon(QIcon("calculate_button.png"))
+    calculate_button_conversions.setIconSize(QSize(320, 40))
+    calculate_button_conversions.clicked.connect(convert_units)
+    calculate_button_conversions.setToolTip("With valid input, convert measurements")
+    cs_buttons_layout_conversions.addWidget(calculate_button_conversions)
+
+    save_button_conversions = QPushButton()
+    save_button_conversions.setIcon(QIcon("save_button.png"))
+    save_button_conversions.setIconSize(QSize(320, 40))
+    save_button_conversions.setToolTip("Export measurement conversion results")
+    cs_buttons_layout_conversions.addWidget(save_button_conversions)
+
+    # Create the first tab for Conversions
+    conversions_tab = QWidget()
+    conversions_layout = QVBoxLayout(conversions_tab)
+    conversions_label = QLabel("Convert measurements by entering valid inputs (1/2, 0.5, 1 1/2, 1.5, etc.)")
+    conversions_label_2 = QLabel("and selecting the units you want to convert from and to, then click Calculate.")
+    conversions_label.setStyleSheet(
+        "color: white; font-family: Inter; font-weight: bold; font-size: 16px; text-align: center; line-height: 2; margin-top: 5px; letter-spacing: 1px; word-spacing: 1px;")
+    conversions_label_2.setStyleSheet(
+        "color: white; font-family: Inter; font-weight: bold; font-size: 16px; text-align: center; line-height: 2; margin-top: 5px; margin-bottom: 10px; letter-spacing: 1px; word-spacing: 1px; ")
+    conversions_label.setAlignment(Qt.AlignCenter)  # Align the label horizontally to the center
+    conversions_label_2.setAlignment(Qt.AlignCenter)
+    conversions_layout.addWidget(conversions_label)
+    conversions_layout.addWidget(conversions_label_2)
+
+    conversions_layout.addLayout(adc_buttons_layout_conversions)
+    conversions_layout.addStretch(1)
+    conversions_layout.addLayout(cs_buttons_layout_conversions)
+
+    global current_layout
+    current_layout= conversions_layout
+
+    tab_widget.addTab(conversions_tab, "CONVERSIONS")
+
+
+def calculate_recipes_button_layout():
+    # Create button layout for the calculator tab
+    adc_buttons_layout_calculator = QHBoxLayout()
+
+    add_button_calculator = QPushButton()
+    add_button_calculator.setIcon(QIcon("add_new_button.png"))
+    add_button_calculator.setIconSize(QSize(200, 40))
+    add_button_calculator.setToolTip(
+        "<span style='color: white; font-size: 13px;'>Add a new entry for calculations</span>")
+    add_button_calculator.clicked.connect(lambda checked, btn=add_button_calculator: add_new_recipe_calculation(btn))
+    adc_buttons_layout_calculator.addWidget(add_button_calculator)
+
+    delete_button_calculator = QPushButton()
+    delete_button_calculator.setIcon(QIcon("delete_all_button.png"))
+    delete_button_calculator.setIconSize(QSize(200, 40))
+    delete_button_calculator.setToolTip(
+        "<span style='color: white; font-size: 13px;'>Deletes all current entries</span>")
+    delete_button_calculator.clicked.connect(delete_all_conversions)
+    adc_buttons_layout_calculator.addWidget(delete_button_calculator)
+
+    clear_button_calculator = QPushButton()
+    clear_button_calculator.setIcon(QIcon("clear_all_button.png"))
+    clear_button_calculator.setIconSize(QSize(200, 40))
+    clear_button_calculator.setToolTip(
+        "<span style='color: white; font-size: 13px;'>Clears all data from the entry fields</span>")
+    clear_button_calculator.clicked.connect(clear_all_conversions)
+    adc_buttons_layout_calculator.addWidget(clear_button_calculator)
+
+    cs_buttons_layout_calculator = QHBoxLayout()
+
+    calculate_button_calculator = QPushButton()
+    calculate_button_calculator.setIcon(QIcon("calculate_button.png"))
+    calculate_button_calculator.setIconSize(QSize(320, 40))
+    calculate_button_calculator.setToolTip("With valid input, calculate modified measurements")
+    cs_buttons_layout_calculator.addWidget(calculate_button_calculator)
+
+    save_button_calculator = QPushButton()
+    save_button_calculator.setIcon(QIcon("save_button.png"))
+    save_button_calculator.setIconSize(QSize(320, 40))
+    save_button_calculator.setToolTip("Export recipe calculation results")
+    cs_buttons_layout_calculator.addWidget(save_button_calculator)
+
+    # ------------------------------------------------------------------------------------------------------------------
+
+    # Create the second tab for Calculator
+    calculator_tab = QWidget()
+    calculator_layout = QVBoxLayout(calculator_tab)
+    calculator_label_1 = QLabel("To calculate a recipe adjustment, first enter the name of the item from the recipe,")
+    calculator_label_2 = QLabel("the measurement from the recipe, and select the units of the measurement.")
+    calculator_label_3 = QLabel("to either multiple or divide the measurement and enter an increment.")
+    calculator_label_4 = QLabel("Calculate to calculate all recipe calculations and results will output below.")
+    calculator_label_1.setStyleSheet(
+        "color: white; font-family: Inter; font-weight: bold; font-size: 16px; text-align: center; line-height: 2; margin-top: 5px; letter-spacing: 1px; word-spacing: 1px;")
+    calculator_label_1.setAlignment(Qt.AlignCenter)  # Align the label horizontally to the center
+    calculator_layout.addWidget(calculator_label_1)
+    calculator_label_2.setStyleSheet(
+        "color: white; font-family: Inter; font-weight: bold; font-size: 16px; text-align: center; line-height: 2; margin-top: 5px; letter-spacing: 1px; word-spacing: 1px;")
+    calculator_label_2.setAlignment(Qt.AlignCenter)  # Align the label horizontally to the center
+    calculator_layout.addWidget(calculator_label_2)
+    calculator_label_3.setStyleSheet(
+        "color: white; font-family: Inter; font-weight: bold; font-size: 16px; text-align: center; line-height: 2; margin-top: 5px; letter-spacing: 1px; word-spacing: 1px;")
+    calculator_label_3.setAlignment(Qt.AlignCenter)  # Align the label horizontally to the center
+    calculator_layout.addWidget(calculator_label_3)
+    calculator_label_4.setStyleSheet(
+        "color: white; font-family: Inter; font-weight: bold; font-size: 16px; text-align: center; line-height: 2; margin-top: 5px; margin-bottom: 10px; letter-spacing: 1px; word-spacing: 1px;")
+    calculator_label_4.setAlignment(Qt.AlignCenter)  # Align the label horizontally to the center
+    calculator_layout.addWidget(calculator_label_4)
+
+    calculator_layout.addLayout(adc_buttons_layout_calculator)
+    calculator_layout.addStretch(1)
+    calculator_layout.addLayout(cs_buttons_layout_calculator)
+
+    global current_layout
+    current_layout = calculator_layout
+
+    tab_widget.addTab(calculator_tab, "RECIPE CALCULATOR")
 
 
 def main():
@@ -68,143 +214,8 @@ def main():
 
     # ------------------------------------------------------------------------------------------------------------------
 
-    # Create button layout for the conversions tab
-    adc_buttons_layout_conversions = QHBoxLayout()
-
-    add_button_conversions = QPushButton()
-    add_button_conversions.setIcon(QIcon("add_new_button.png"))
-    add_button_conversions.setIconSize(QSize(200, 40))
-    add_button_conversions.setToolTip("<span style='color: white; font-size: 13px;'>Add a new entry to convert</span>")
-    add_button_conversions.clicked.connect(lambda checked, btn=add_button_conversions: add_new_conversion(btn))
-    adc_buttons_layout_conversions.addWidget(add_button_conversions)
-
-    delete_button_conversions = QPushButton()
-    delete_button_conversions.setIcon(QIcon("delete_all_button.png"))
-    delete_button_conversions.setIconSize(QSize(200, 40))
-    delete_button_conversions.setToolTip(
-        "<span style='color: white; font-size: 13px;'>Deletes all current entries</span>")
-    delete_button_conversions.clicked.connect(delete_all_conversions)
-    adc_buttons_layout_conversions.addWidget(delete_button_conversions)
-
-    clear_button_conversions = QPushButton()
-    clear_button_conversions.setIcon(QIcon("clear_all_button.png"))
-    clear_button_conversions.setIconSize(QSize(200, 40))
-    clear_button_conversions.setToolTip(
-        "<span style='color: white; font-size: 13px;'>Clears all data from the entry fields</span>")
-    clear_button_conversions.clicked.connect(clear_all_conversions)
-    adc_buttons_layout_conversions.addWidget(clear_button_conversions)
-
-    cs_buttons_layout_conversions = QHBoxLayout()
-
-    calculate_button_conversions = QPushButton()
-    calculate_button_conversions.setIcon(QIcon("calculate_button.png"))
-    calculate_button_conversions.setIconSize(QSize(320, 40))
-    calculate_button_conversions.clicked.connect(convert_units)
-    cs_buttons_layout_conversions.addWidget(calculate_button_conversions)
-
-    save_button_conversions = QPushButton()
-    save_button_conversions.setIcon(QIcon("save_button.png"))
-    save_button_conversions.setIconSize(QSize(320, 40))
-    cs_buttons_layout_conversions.addWidget(save_button_conversions)
-
-    # ------------------------------------------------------------------------------------------------------------------
-
-    # Create the first tab for Conversions
-    conversions_tab = QWidget()
-    conversions_layout = QVBoxLayout(conversions_tab)
-    conversions_label = QLabel("Convert measurements by entering valid inputs (1/2, 0.5, 1 1/2, 1.5, etc.)")
-    conversions_label_2 = QLabel("and selecting the units you want to convert from and to, then click Calculate.")
-    conversions_label.setStyleSheet(
-        "color: white; font-family: Inter; font-weight: bold; font-size: 16px; text-align: center; line-height: 2; margin-top: 5px; letter-spacing: 1px; word-spacing: 1px;")
-    conversions_label_2.setStyleSheet(
-        "color: white; font-family: Inter; font-weight: bold; font-size: 16px; text-align: center; line-height: 2; margin-top: 5px; margin-bottom: 10px; letter-spacing: 1px; word-spacing: 1px; ")
-    conversions_label.setAlignment(Qt.AlignCenter)  # Align the label horizontally to the center
-    conversions_label_2.setAlignment(Qt.AlignCenter)
-    conversions_layout.addWidget(conversions_label)
-    conversions_layout.addWidget(conversions_label_2)
-
-    conversions_layout.addLayout(adc_buttons_layout_conversions)
-    conversions_layout.addStretch(1)
-    conversions_layout.addLayout(cs_buttons_layout_conversions)
-
-    current_layout = conversions_layout
-
-    tab_widget.addTab(conversions_tab, "CONVERSIONS")
-
-    # ------------------------------------------------------------------------------------------------------------------
-
-    # Create button layout for the calculator tab
-    adc_buttons_layout_calculator = QHBoxLayout()
-
-    add_button_calculator = QPushButton()
-    add_button_calculator.setIcon(QIcon("add_new_button.png"))
-    add_button_calculator.setIconSize(QSize(200, 40))
-    add_button_calculator.setToolTip(
-        "<span style='color: white; font-size: 13px;'>Add a new entry for calculations</span>")
-    add_button_calculator.clicked.connect(lambda checked, btn=add_button_calculator: add_new_recipe_calculation(btn))
-    adc_buttons_layout_calculator.addWidget(add_button_calculator)
-
-    delete_button_calculator = QPushButton()
-    delete_button_calculator.setIcon(QIcon("delete_all_button.png"))
-    delete_button_calculator.setIconSize(QSize(200, 40))
-    delete_button_calculator.setToolTip(
-        "<span style='color: white; font-size: 13px;'>Deletes all current entries</span>")
-    delete_button_calculator.clicked.connect(delete_all_conversions)
-    adc_buttons_layout_calculator.addWidget(delete_button_calculator)
-
-    clear_button_calculator = QPushButton()
-    clear_button_calculator.setIcon(QIcon("clear_all_button.png"))
-    clear_button_calculator.setIconSize(QSize(200, 40))
-    clear_button_calculator.setToolTip(
-        "<span style='color: white; font-size: 13px;'>Clears all data from the entry fields</span>")
-    clear_button_calculator.clicked.connect(clear_all_conversions)
-    adc_buttons_layout_calculator.addWidget(clear_button_calculator)
-
-    cs_buttons_layout_calculator = QHBoxLayout()
-
-    calculate_button_calculator = QPushButton()
-    calculate_button_calculator.setIcon(QIcon("calculate_button.png"))
-    calculate_button_calculator.setIconSize(QSize(320, 40))
-    cs_buttons_layout_calculator.addWidget(calculate_button_calculator)
-
-    save_button_calculator = QPushButton()
-    save_button_calculator.setIcon(QIcon("save_button.png"))
-    save_button_calculator.setIconSize(QSize(320, 40))
-    cs_buttons_layout_calculator.addWidget(save_button_calculator)
-
-    # ------------------------------------------------------------------------------------------------------------------
-
-    # Create the second tab for Calculator
-    calculator_tab = QWidget()
-    calculator_layout = QVBoxLayout(calculator_tab)
-    calculator_label_1 = QLabel("To calculate a recipe adjustment, first enter the name of the item from the recipe,")
-    calculator_label_2 = QLabel("the measurement from the recipe, and select the units of the measurement.")
-    calculator_label_3 = QLabel("to either multiple or divide the measurement and enter an increment.")
-    calculator_label_4 = QLabel("Calculate to calculate all recipe calculations and results will output below.")
-    calculator_label_1.setStyleSheet(
-        "color: white; font-family: Inter; font-weight: bold; font-size: 16px; text-align: center; line-height: 2; margin-top: 5px; letter-spacing: 1px; word-spacing: 1px;")
-    calculator_label_1.setAlignment(Qt.AlignCenter)  # Align the label horizontally to the center
-    calculator_layout.addWidget(calculator_label_1)
-    calculator_label_2.setStyleSheet(
-        "color: white; font-family: Inter; font-weight: bold; font-size: 16px; text-align: center; line-height: 2; margin-top: 5px; letter-spacing: 1px; word-spacing: 1px;")
-    calculator_label_2.setAlignment(Qt.AlignCenter)  # Align the label horizontally to the center
-    calculator_layout.addWidget(calculator_label_2)
-    calculator_label_3.setStyleSheet(
-        "color: white; font-family: Inter; font-weight: bold; font-size: 16px; text-align: center; line-height: 2; margin-top: 5px; letter-spacing: 1px; word-spacing: 1px;")
-    calculator_label_3.setAlignment(Qt.AlignCenter)  # Align the label horizontally to the center
-    calculator_layout.addWidget(calculator_label_3)
-    calculator_label_4.setStyleSheet(
-        "color: white; font-family: Inter; font-weight: bold; font-size: 16px; text-align: center; line-height: 2; margin-top: 5px; margin-bottom: 10px; letter-spacing: 1px; word-spacing: 1px;")
-    calculator_label_4.setAlignment(Qt.AlignCenter)  # Align the label horizontally to the center
-    calculator_layout.addWidget(calculator_label_4)
-
-    calculator_layout.addLayout(adc_buttons_layout_calculator)
-    calculator_layout.addStretch(1)
-    calculator_layout.addLayout(cs_buttons_layout_calculator)
-
-    current_layout = calculator_layout
-
-    tab_widget.addTab(calculator_tab, "RECIPE CALCULATOR")
+    conversions_button_layout()
+    calculate_recipes_button_layout()
 
     # ------------------------------------------------------------------------------------------------------------------
 
@@ -630,12 +641,9 @@ def show_toast(title, message):
 
 
 def convert_units():
-    # Define conversion factors for each unit
-    conversion_factors = {
-        "cups": {"tbsp": 16, "tsp": 48},
-        "tbsp": {"cups": 1/16, "tsp": 3},
-        "tsp": {"cups": 1/48, "tbsp": 1/3}
-    }
+    context = zmq.Context()
+    socket = context.socket(zmq.REQ)
+    socket.connect("tcp://localhost:5555")
 
     # Iterate through each conversion layout
     for layout in conversion_layouts_map.values():
@@ -657,7 +665,7 @@ def convert_units():
 
         # Convert input value to float or fraction
         try:
-            input_value = fractions.Fraction(input_value_str)
+            input_value = float(fractions.Fraction(input_value_str))
         except ValueError:
             show_toast("Invalid Input", "Please enter a valid number.")
             continue
@@ -670,16 +678,21 @@ def convert_units():
             show_toast("Invalid Input", "Measurement units must not match.")
             continue
 
-        # Perform unit conversion calculation using the conversion factors
-        conversion_factor = conversion_factors[input_unit][output_unit]
-        converted_value = input_value * conversion_factor
+        # Send request to the conversion microservice
+        request = {
+            "value": input_value,
+            "input_unit": input_unit,
+            "output_unit": output_unit
+        }
+        socket.send_json(request)
 
-        # Convert the result to a fraction if it's a whole number
-        if isinstance(converted_value, fractions.Fraction):
-            result_value = converted_value
+        # Receive response from the microservice
+        response = socket.recv_json()
+        if response['status'] == 'success':
+            result_value = response['data']
         else:
-            # Convert decimal to fraction
-            result_value = fractions.Fraction(converted_value).limit_denominator()
+            show_toast("Conversion Error", response['message'])
+            continue
 
         # Update result box with the converted value
         result_box = layout.itemAt(4).widget()
