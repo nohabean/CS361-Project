@@ -126,6 +126,7 @@ def calculate_recipes_button_layout():
     calculate_button_calculator.setIcon(QIcon("calculate_button.png"))
     calculate_button_calculator.setIconSize(QSize(320, 40))
     calculate_button_calculator.setToolTip("With valid input, calculate modified measurements")
+    calculate_button_calculator.clicked.connect(calculate_recipes)
     cs_buttons_layout_calculator.addWidget(calculate_button_calculator)
 
     save_button_calculator = QPushButton()
@@ -366,7 +367,7 @@ def add_new_recipe_calculation(sender_button):
     item_name_input_box.setPlaceholderText("milk, butter, flour, cheese, ...")
     item_name_input_box.setToolTip("<span style='color: white; font-size: 13px;'>Enter a valid measurement</span>")
     item_name_input_box.textChanged.connect(lambda text: item_name_input_box.setStyleSheet(
-        "background-color: black; color: white; border: 2px solid red; border-radius: 5px; height: 40px; width: 100px; font-weight: bold; font-size: 14px; font-family: Inter; padding-left: 10px;" if not validate_input(text) else "background-color: black; color: white; border: 2px solid white; border-radius: 5px; height: 40px; width: 100px; font-weight: bold; font-size: 14px; font-family: Inter; padding-left: 10px;"))
+        "background-color: black; color: white; border: 2px solid red; border-radius: 5px; height: 40px; width: 100px; font-weight: bold; font-size: 14px; font-family: Inter; padding-left: 10px;" if not text else "background-color: black; color: white; border: 2px solid white; border-radius: 5px; height: 40px; width: 100px; font-weight: bold; font-size: 14px; font-family: Inter; padding-left: 10px;"))
 
     measurement_input_box = QLineEdit()
     measurement_input_box.setStyleSheet(
@@ -384,7 +385,13 @@ def add_new_recipe_calculation(sender_button):
     measurement_input_unit_dropdown.setPlaceholderText("units")
     measurement_input_unit_dropdown.setToolTip("<span style='color: black; font-size: 13px;'>Select measurement units</span>")
 
-    #calc_function_switch =
+    # Add a button to select divide or multiply
+    operation_dropdown = QComboBox()
+    operation_dropdown.addItems(["Multiply", "Divide"])
+    operation_dropdown.setStyleSheet(
+        "background-color: white; color: black; height: 40px; width: 80px; font-size: 16px; font-family: Inter; font-weight: bold;")
+    operation_dropdown.setCurrentIndex(-1)
+    operation_dropdown.setToolTip("<span style='color: black; font-size: 13px;'>Select operation</span>")
 
     calc_factor_input = QLineEdit()
     calc_factor_input.setStyleSheet(
@@ -411,7 +418,7 @@ def add_new_recipe_calculation(sender_button):
     new_recipe_calculator_layout.addWidget(item_name_input_box)
     new_recipe_calculator_layout.addWidget(measurement_input_box)
     new_recipe_calculator_layout.addWidget(measurement_input_unit_dropdown)
-    #new_recipe_calculator_layout.addWidget(calc_function)
+    new_recipe_calculator_layout.addWidget(operation_dropdown)
     new_recipe_calculator_layout.addWidget(calc_factor_input)
     new_recipe_calculator_layout.addWidget(equal_label)
     new_recipe_calculator_layout.addWidget(calc_result_box)
@@ -671,7 +678,67 @@ def convert_units():
 
 
 def calculate_recipes():
-    pass
+    context = zmq.Context()
+    socket = context.socket(zmq.REQ)
+    socket.connect("tcp://localhost:5555")
+
+    for layout in conversion_layouts_map.values():
+        # Extract item name, measurement value, and units
+        item_name_box = layout.itemAt(1).widget()
+        item_name = item_name_box.text()
+
+        # Validate item_name
+        if not item_name:
+            show_toast("Invalid Input", "Item name cannot be empty.")
+            continue
+
+        measurement_input_box = layout.itemAt(2).widget()
+        measurement_value_str = measurement_input_box.text()
+
+        measurement_unit_dropdown = layout.itemAt(3).widget()
+        measurement_unit = measurement_unit_dropdown.currentText()
+
+        operation_dropdown = layout.itemAt(4).widget()
+        operation = operation_dropdown.currentText()
+
+        calc_factor_input = layout.itemAt(5).widget()
+        calc_factor_str = calc_factor_input.text()
+
+        if not validate_input(measurement_value_str) or not validate_factor_input(calc_factor_str):
+            continue
+
+        try:
+            measurement_value = float(fractions.Fraction(measurement_value_str))
+            calc_factor = float(calc_factor_str)
+        except ValueError:
+            show_toast("Invalid Input", "Please enter valid numbers.")
+            continue
+
+        if measurement_unit == "" or operation == "":
+            show_toast("Invalid Input", "Must select measurement units and operation.")
+            continue
+
+        # Send request to the microservice
+        request = {
+            "item_name": item_name,
+            "measurement_value": measurement_value,
+            "measurement_unit": measurement_unit,
+            "operation": operation,
+            "calc_factor": calc_factor
+        }
+        socket.send_json(request)
+
+        # Receive response from the microservice
+        response = socket.recv_json()
+        if response['status'] == 'success':
+            result_value = response['data']
+        else:
+            show_toast("Calculation Error", response['message'])
+            continue
+
+        # Update result box with the calculated value
+        result_box = layout.itemAt(7).widget()
+        result_box.setText(str(result_value))
 
 
 def save_conversions():
