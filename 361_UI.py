@@ -566,49 +566,19 @@ def validate_input(input_text):
     """
     Validate if the input is a number, "/", ".", or " " and ensure no more than one occurrence.
     """
-    valid_characters = "0123456789/. "
+    context = zmq.Context()
+    socket = context.socket(zmq.REQ)
+    socket.connect("tcp://localhost:5556")
 
-    # Check if the input starts with a space or "/"
-    if input_text.startswith(" ") or input_text.startswith("/"):
-        show_toast("Invalid Input", "Input cannot start with a space or '/'.")
-        return False
+    request = {"input_text": input_text}
+    socket.send_json(request)
 
-    # Count the occurrences of "/", ",", and " "
-    slash_count = input_text.count("/")
-    comma_count = input_text.count(".")
-    space_count = input_text.count(" ")
-
-    # Check for dividing by zero
-    if "/" in input_text and input_text.endswith("/0"):
-        show_toast("Invalid Input", "Cannot divide by zero.")
-        return False
-
-    # Split the input into whole number and fraction parts
-    parts = input_text.split(" ")
-    if len(parts) == 2:
-        whole_part, fraction_part = parts
-        # If there's a "/" in the input, ensure it's at the end (fraction)
-        if "/" in whole_part and not "/" in fraction_part:
-            show_toast("Invalid Input", "Please enter a valid number or fraction.")
-            return False
+    response = socket.recv_json()
+    if response['status'] == 'success':
+        return True
     else:
-        whole_part = parts[0]
-        fraction_part = ""
-
-    # If any of these counts exceed 1, return False
-    if slash_count > 1 or comma_count > 1 or space_count > 1 or (slash_count + comma_count > 1) or (comma_count + space_count > 1):
-        show_toast("Invalid Input", "Exceeded allowed number of special characters. Please enter a valid number or fraction.")
+        show_toast("Invalid Input", response['message'])
         return False
-
-    # Check each character in the input_text
-    for char in input_text:
-        # If the character is not in the valid characters, show a toast notification and return False
-        if char not in valid_characters:
-            show_toast("Invalid Input", "Please enter a valid number or fraction.")
-            return False
-
-    # If all characters are valid, return True
-    return True
 
 
 def validate_factor_input(input_text):
@@ -651,6 +621,10 @@ def convert_units():
         input_box = layout.itemAt(1).widget()
         input_value_str = input_box.text()
 
+        # Validate input value using the microservice
+        if not validate_input(input_value_str):
+            continue
+
         # Extract input unit from input unit dropdown
         input_unit_dropdown = layout.itemAt(2).widget()
         input_unit = input_unit_dropdown.currentText()
@@ -658,10 +632,6 @@ def convert_units():
         # Extract output unit from output unit dropdown
         output_unit_dropdown = layout.itemAt(5).widget()
         output_unit = output_unit_dropdown.currentText()
-
-        # Perform input validation
-        if not validate_input(input_value_str):
-            continue
 
         # Convert input value to float or fraction
         try:
