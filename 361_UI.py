@@ -5,7 +5,7 @@ import sys
 import zmq
 from PySide6.QtGui import QIcon, QPixmap
 from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QTabWidget, QLabel, QHBoxLayout, QPushButton, QDialog, \
-    QDialogButtonBox, QLineEdit, QComboBox, QMessageBox, QMainWindow
+    QDialogButtonBox, QLineEdit, QComboBox, QMessageBox, QMainWindow, QFileDialog
 from PySide6.QtCore import Qt, QSize
 
 
@@ -65,6 +65,7 @@ def conversions_button_layout():
     save_button_conversions.setIcon(QIcon("save_button.png"))
     save_button_conversions.setIconSize(QSize(320, 40))
     save_button_conversions.setToolTip("Export measurement conversion results")
+    save_button_conversions.clicked.connect(save_conversions)
     cs_buttons_layout_conversions.addWidget(save_button_conversions)
 
     # Create the first tab for Conversions
@@ -671,6 +672,57 @@ def convert_units():
 
 def calculate_recipes():
     pass
+
+
+def save_conversions():
+    context = zmq.Context()
+    socket = context.socket(zmq.REQ)
+    socket.connect("tcp://localhost:5557")
+
+    conversions_data = []
+
+    # Collect all entries and their results
+    for layout in conversion_layouts_map.values():
+        input_box = layout.itemAt(1).widget()
+        input_value = input_box.text()
+
+        input_unit_dropdown = layout.itemAt(2).widget()
+        input_unit = input_unit_dropdown.currentText()
+
+        result_box = layout.itemAt(4).widget()
+        result_value = result_box.text()
+
+        output_unit_dropdown = layout.itemAt(5).widget()
+        output_unit = output_unit_dropdown.currentText()
+
+        # Append the data to conversions_data
+        conversions_data.append({
+            "input": input_value,
+            "input_unit": input_unit,
+            "output": result_value,
+            "output_unit": output_unit
+        })
+
+    # Open a file dialog to let the user choose the save location and file name
+    options = QFileDialog.Options()
+    file_path, _ = QFileDialog.getSaveFileName(None, "Save Conversions", "", "Text Files (*.txt);;All Files (*)",
+                                               options=options)
+    if not file_path:
+        show_toast("Save Cancelled", "No file selected for saving.")
+        return
+
+    # Send request to the save conversions microservice
+    request = {"data": conversions_data, "file_path": file_path}
+    print(f"Sending request: {request}")  # Print for debugging
+    socket.send_json(request)
+
+    # Receive response from the microservice
+    response = socket.recv_json()
+    print(f"Received response: {response}")  # Print for debugging
+    if response['status'] == 'success':
+        show_toast("Save Successful", response['message'])
+    else:
+        show_toast("Save Error", response['message'])
 
 
 if __name__ == "__main__":
