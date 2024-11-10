@@ -30,14 +30,14 @@ def conversions_button_layout():
     adc_buttons_layout_conversions = QHBoxLayout()
 
     add_button_conversions = QPushButton()
-    add_button_conversions.setIcon(QIcon("add_new_button.png"))
+    add_button_conversions.setIcon(QIcon("images/add_new_button.png"))
     add_button_conversions.setIconSize(QSize(200, 40))
     add_button_conversions.setToolTip("<span style='color: white; font-size: 13px;'>Add a new entry to convert</span>")
     add_button_conversions.clicked.connect(lambda checked, btn=add_button_conversions: add_new_conversion(btn))
     adc_buttons_layout_conversions.addWidget(add_button_conversions)
 
     delete_button_conversions = QPushButton()
-    delete_button_conversions.setIcon(QIcon("delete_all_button.png"))
+    delete_button_conversions.setIcon(QIcon("images/delete_all_button.png"))
     delete_button_conversions.setIconSize(QSize(200, 40))
     delete_button_conversions.setToolTip(
         "<span style='color: white; font-size: 13px;'>Deletes all current entries</span>")
@@ -45,7 +45,7 @@ def conversions_button_layout():
     adc_buttons_layout_conversions.addWidget(delete_button_conversions)
 
     clear_button_conversions = QPushButton()
-    clear_button_conversions.setIcon(QIcon("clear_all_button.png"))
+    clear_button_conversions.setIcon(QIcon("images/clear_all_button.png"))
     clear_button_conversions.setIconSize(QSize(200, 40))
     clear_button_conversions.setToolTip(
         "<span style='color: white; font-size: 13px;'>Clears all data from the entry fields</span>")
@@ -55,14 +55,14 @@ def conversions_button_layout():
     cs_buttons_layout_conversions = QHBoxLayout()
 
     calculate_button_conversions = QPushButton()
-    calculate_button_conversions.setIcon(QIcon("calculate_button.png"))
+    calculate_button_conversions.setIcon(QIcon("images/calculate_button.png"))
     calculate_button_conversions.setIconSize(QSize(320, 40))
     calculate_button_conversions.clicked.connect(convert_units)
     calculate_button_conversions.setToolTip("With valid input, convert measurements")
     cs_buttons_layout_conversions.addWidget(calculate_button_conversions)
 
     save_button_conversions = QPushButton()
-    save_button_conversions.setIcon(QIcon("save_button.png"))
+    save_button_conversions.setIcon(QIcon("images/save_button.png"))
     save_button_conversions.setIconSize(QSize(320, 40))
     save_button_conversions.setToolTip("Export measurement conversion results")
     save_button_conversions.clicked.connect(save_conversions)
@@ -97,7 +97,7 @@ def calculate_recipes_button_layout():
     adc_buttons_layout_calculator = QHBoxLayout()
 
     add_button_calculator = QPushButton()
-    add_button_calculator.setIcon(QIcon("add_new_button.png"))
+    add_button_calculator.setIcon(QIcon("images/add_new_button.png"))
     add_button_calculator.setIconSize(QSize(200, 40))
     add_button_calculator.setToolTip(
         "<span style='color: white; font-size: 13px;'>Add a new entry for calculations</span>")
@@ -105,7 +105,7 @@ def calculate_recipes_button_layout():
     adc_buttons_layout_calculator.addWidget(add_button_calculator)
 
     delete_button_calculator = QPushButton()
-    delete_button_calculator.setIcon(QIcon("delete_all_button.png"))
+    delete_button_calculator.setIcon(QIcon("images/delete_all_button.png"))
     delete_button_calculator.setIconSize(QSize(200, 40))
     delete_button_calculator.setToolTip(
         "<span style='color: white; font-size: 13px;'>Deletes all current entries</span>")
@@ -113,7 +113,7 @@ def calculate_recipes_button_layout():
     adc_buttons_layout_calculator.addWidget(delete_button_calculator)
 
     clear_button_calculator = QPushButton()
-    clear_button_calculator.setIcon(QIcon("clear_all_button.png"))
+    clear_button_calculator.setIcon(QIcon("images/clear_all_button.png"))
     clear_button_calculator.setIconSize(QSize(200, 40))
     clear_button_calculator.setToolTip(
         "<span style='color: white; font-size: 13px;'>Clears all data from the entry fields</span>")
@@ -123,14 +123,14 @@ def calculate_recipes_button_layout():
     cs_buttons_layout_calculator = QHBoxLayout()
 
     calculate_button_calculator = QPushButton()
-    calculate_button_calculator.setIcon(QIcon("calculate_button.png"))
+    calculate_button_calculator.setIcon(QIcon("images/calculate_button.png"))
     calculate_button_calculator.setIconSize(QSize(320, 40))
     calculate_button_calculator.setToolTip("With valid input, calculate modified measurements")
     calculate_button_calculator.clicked.connect(calculate_recipes)
     cs_buttons_layout_calculator.addWidget(calculate_button_calculator)
 
     save_button_calculator = QPushButton()
-    save_button_calculator.setIcon(QIcon("save_button.png"))
+    save_button_calculator.setIcon(QIcon("images/save_button.png"))
     save_button_calculator.setIconSize(QSize(320, 40))
     save_button_calculator.setToolTip("Export recipe calculation results")
     save_button_calculator.clicked.connect(save_recipe_calculations)
@@ -187,7 +187,7 @@ def main():
     dark_title_bar(window)
 
     # Set custom icon for the title bar
-    app_icon = QIcon("main_window_icon.ico")
+    app_icon = QIcon("images/main_window_icon.ico")
     window.setWindowIcon(app_icon)
 
     # Create the main layout
@@ -284,7 +284,7 @@ def add_new_conversion(sender_button):
 
     # Create widgets
     delete_button = QPushButton()
-    delete_button.setIcon(QIcon("delete_entry_button.png"))
+    delete_button.setIcon(QIcon("images/delete_entry_button.png"))
     delete_button.setIconSize(QSize(50, 50))
     delete_button.setToolTip("<span style='color: white; font-size: 13px;'>Delete this entry</span>")
     delete_button.clicked.connect(lambda checked, btn=delete_button: delete_entry(btn))
@@ -321,7 +321,7 @@ def add_new_conversion(sender_button):
 
 
     swap_button = QPushButton()
-    swap_button.setIcon(QIcon("swap_button.png"))
+    swap_button.setIcon(QIcon("images/swap_button.png"))
     swap_button.setIconSize(QSize(40, 40))
     swap_button.setToolTip("<span style='color: white; font-size: 13px;'>Swap this entry's units</span>")
     swap_button.clicked.connect(lambda checked, btn=swap_button: swap_units(btn))
@@ -358,7 +358,7 @@ def add_new_recipe_calculation(sender_button):
 
     # Create widgets
     delete_button = QPushButton()
-    delete_button.setIcon(QIcon("delete_entry_button.png"))
+    delete_button.setIcon(QIcon("images/delete_entry_button.png"))
     delete_button.setIconSize(QSize(50, 50))
     delete_button.setToolTip("<span style='color: white; font-size: 13px;'>Delete this entry</span>")
     delete_button.clicked.connect(lambda checked, btn=delete_button: delete_entry(btn))
