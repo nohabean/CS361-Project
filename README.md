@@ -7,12 +7,47 @@ The project is a Recipe Calculator and Converter desktop application. It is writ
     <li>Python</li>
 </ul>
 
-### Technologies and Libraries Used
+### Technologies, Libraries, and IDEs Used
 <ul>
     <li>ZeroMQ for client/server communications for microservices</li>
     <li>PySide 6 for UI</li>
     <li>PyQT 5 integrated with PySide for UI</li>
+    <li>PyCharm</li>
 </ul>
+
+## Setup
+1. Clone the Git repo and navigate to the directory
+
+    ```
+   https://github.com/nohabean/Recipe-Calculator-Converter.git
+   cd ./path/to/Recipe-Calculator-Converter
+   ```
+
+2. Install Dependencies
+   - Python 3.11+
+    
+      ```
+      pip install -r requirements.txt
+      ```
+
+3. Run the client, server, and UI in separate terminals, starting with the server.
+   - Terminal 1: Run tcp_server.py
+
+     ```
+     python tcp_server.py
+     ```   
+
+   - Terminal 2: Run tcp_client.py
+   
+     ```
+     python tcp_client.py
+     ```    
+   
+   - Terminal 3: Run UI.py
+   
+     ```
+     python UI.py
+     ```  
 
 ## Conversions
 The Conversions tab takes user input to convert measurements for each entered value. Users can add multiple entries, delete an entry, delete all entries, clear all current inputs in the entries, and export the entries and results.
